@@ -1,0 +1,39 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { getPage } from "../lib/contentstack";
+import { pageHtml } from "../lib/renderPage";
+import "../styles/global.css";
+
+// Rendered at build time with published content, using the same markup
+// function the browser uses to re-render during live preview.
+const page = await getPage("/");
+---
+
+<script>
+  import {
+    initLivePreview,
+    isPreviewEnabled,
+    onEntryChange,
+    getPage,
+  } from "../lib/contentstack";
+  import { renderPage } from "../lib/renderPage";
+
+  initLivePreview();
+
+  // The builder notifies us via postMessage. Re-fetch the entry client-side
+  // and re-render the page without an iframe refresh.
+  if (isPreviewEnabled) {
+    onEntryChange(async () => {
+      const page = await getPage("/");
+
+      if (page) {
+        renderPage(page);
+      }
+    });
+  }
+</script>
+<Layout title="Welcome to Astro.">
+  <main class="max-w-3xl mx-auto">
+    <section class="p-4" set:html={pageHtml(page)} />
+  </main>
+</Layout>
